@@ -1,0 +1,14 @@
+Project 2 is about Unit Testing of the Voting contract
+
+    --> testAddVoter.js  =  we are testing the addVoter function
+
+
+
+    --> testAddProposal.js  =  we are testing the AddProposal function
+
+
+
+
+==> rajouter tous les describe
+==> test de l'égalité
+==> test chaque fonctionnalité avec des inputs differents
