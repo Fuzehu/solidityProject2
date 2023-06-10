@@ -1,10 +1,76 @@
+# General Info
+***
 Project 2 is about Unit Testing of the Voting contract
+***
 
-    --> testAddVoter.js  =  we are testing the addVoter function
+## Breaking down the used methodology
+*** 
+We decided to separate each function testing to a specific file.
+Therefore tests regarding the function "addVoter" will be found in the file "test(1)addVoter.js".
+
+Moreover, Data Structure such as mappings, arrays, and various struct won't be tested directly. 
+Indeed, interactions with data struct will be tested in each specific functions.
+*** 
+
+### Breaking down Voting's contract Unit Testing
+    8 files 
+    45 differents tests each passing
+
+1. test(1)addVoter.js = addVoter function testing (6 tests)
+    * 'should register a voter with correct info' 
+        check that a voter is correctly added via the mappinng and initialized with :
+            - isRegistered = true
+            - hasVoted = false
+            - votedProposalID = 0
+    * 'should emit VoterRegistered event'
+        check that the "VoterRegistered" event is correctly emited with the voter's address
+    * 'should revert if not called by the contract owner'
+        check the onlyOwner modifier by expecting a revert if not triggered by the owner's address
+    * 'should revert when adding a voter in a different workflow status'
+        check that any other workflowStatus than RegisteringVoters cause a revert
+    * 'should revert when adding an already registered voter'
+        check that if the owner try to register an already registered user it causes a revert
+    * 'should be RegisteringVoters as default workflowStatus'
+        check that the default workflowStatus is correctly initialised at index 0 which is "RegisteringVoters"
+
+2. test(2)startProposalsRegistering.js = startProposalsRegistering function testing (5 tests)
+    * 'should startProposalsRegistering correctly'
+        check that the workflowStatus is correctly updated from RegisteringVoters to ProposalsRegistrationStarted
+    * 'should emit WorkflowStatusChange event correctly'
+        check that the chhangeWorkflowStatus event emit correct information with RegisteringVoters as previousStatus and ProposalsRegistrationStarted as newStatus
+    * 'should update the proposalsArray correctly'
+        check that while the function startProposalsRegistering is called the "GENESIS" proposal is correctly added to the proposalsArray with the corresponding informations :
+            - description = "GENESIS"
+            - voteCount = 0
+    * 'should revert if not called by the contract owner'
+        check the onlyOwner modifier by expecting a revert if not triggered by the owner's address
+    * 'should revert if WorkflowStatus is different from RegisteringVoters'
+        check that it is impossible to call the startProposalsRegistering function in any other workflowStatus different than RegisteringVoters
+
+3. test(3)addProposal.js = addProposal function testing (X tests)
+    * 'should add a proposal correctly'
+        check that a registered voter can add a proposal to the proposalsArray index 1 with the corresponding informations : 
+            - description = proposalDescription1
+            - voteCount = 0
+    * 'should increase properly the proposalsArray count'
+        same test as the previous one, but we checked that while adding a second proposition : 
+            - it is correctly affected to the index 2 of the proposalsArray
+            - while correct informations are still affected as expected
+    * 'should emit ProposalAdded event'
+
+4. test(4)endProposalsRegistering.js = endProposalsRegistering function testing
+5. test(5)startVotingSession.js = startVotingSession function testing
+6. test(6)setVote.js = setVote function testing
+7. test(7)endVotingSession.js = endVotingSession function testing 
+8. test(8)tallyVotes.js = tallyVotes function testing 
 
 
-
-    --> testAddProposal.js  =  we are testing the AddProposal function
+#### Personal notes
+* I didn't know if the test's revert reasons had to be the same as in the Voting contract.
+    For example while checking the workflow status in "test(1)addVoter.js" i used the revert specified in the original contract :  
+        - require(workflowStatus == WorkflowStatus.RegisteringVoters, 'Voters registration is not open yet')
+        - however in the test file, i checked that while the workflowStatus "startProposalsRegistering" is active, it is impossible to add a new voter. 
+    Technically, the revert cause's is incorect and should be something as "Registering session has already ended". 
 
 
 

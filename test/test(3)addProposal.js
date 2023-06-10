@@ -11,7 +11,9 @@ contract('Voting', accounts => {
     const nonRegisteredVoter = accounts[8];
     const proposalDescription1 = "Proposal 1";
     const proposalDescription2 = "Proposal 2";
-    
+    const ProposalId1 =  new BN(1); // BN(1) as BN(0) is already allocated to proposal.description = "GENESIS"
+    const ProposalId2 =  new BN(2);
+
     
     beforeEach(async () => {
       votingInstance = await Voting.new({ from: owner });
@@ -20,29 +22,29 @@ contract('Voting', accounts => {
     });
 
 
-    it('should add a proposal', async () => {
+    it('should add a proposal correctly', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
         await votingInstance.addProposal(proposalDescription1, { from: voter1 });
 
-        let firstProposal = await votingInstance.getOneProposal(new BN(1), { from: voter1 });
+        let firstProposal = await votingInstance.getOneProposal(ProposalId1, { from: voter1 });
 
         expect(firstProposal.description).equal(proposalDescription1);
         expect(firstProposal.voteCount).to.be.bignumber.equal(new BN(0));     
     });
 
     
-    it('Should increase properly the proposalsArray count', async () => {
+    it('should increase properly the proposalsArray count', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
         await votingInstance.addProposal(proposalDescription1, { from: voter1 });
 
-        let firstProposal = await votingInstance.getOneProposal(new BN(1), { from: voter1 }); // BN(1) as BN(0) is already allocated to proposal.description = "GENESIS"
+        let firstProposal = await votingInstance.getOneProposal(ProposalId1, { from: voter1 }); 
 
         expect(firstProposal.description).equal(proposalDescription1);
         expect(firstProposal.voteCount).to.be.bignumber.equal(new BN(0));
 
         await votingInstance.addProposal(proposalDescription2, { from: voter2 });
 
-        let secondProposal = await votingInstance.getOneProposal(new BN(2), { from: voter2 });
+        let secondProposal = await votingInstance.getOneProposal(ProposalId2, { from: voter2 });
 
         expect(secondProposal.description).equal(proposalDescription2);
         expect(secondProposal.voteCount).to.be.bignumber.equal(new BN(0));

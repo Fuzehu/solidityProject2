@@ -12,10 +12,20 @@ contract('Voting', accounts => {
       votingInstance = await Voting.new({ from: owner });
     });
   
-
-    it('should revert when adding an already registered voter', async () => {
+    it('should register a voter with correct info', async () => {
         await votingInstance.addVoter(voter, { from: owner });
-        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Already registered');
+
+        let registeredVoter = await votingInstance.getVoter(voter, { from: voter });
+        
+        expect(registeredVoter.isRegistered).to.equal(true);
+        expect(registeredVoter.hasVoted).to.equal(false);
+        expect(registeredVoter.votedProposalId).to.be.bignumber.equal(new BN(0));
+    });
+
+
+    it('should emit VoterRegistered event', async () => {
+        let evt = await votingInstance.addVoter(voter, { from: owner });
+        expectEvent(evt, 'VoterRegistered', {voterAddress: voter,});
     });
 
 
@@ -27,24 +37,32 @@ contract('Voting', accounts => {
     it('should revert when adding a voter in a different workflow status', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
         expectRevert(votingInstance.addVoter(voter, { from: owner }),'Voters registration is not open yet');
+
+        await votingInstance.endProposalsRegistering({ from: owner });
+        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Voters registration is not open yet');
+
+        await votingInstance.startVotingSession({ from: owner });
+        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Voters registration is not open yet');
+
+        await votingInstance.endVotingSession({ from: owner });
+        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Voters registration is not open yet');
+
+        await votingInstance.tallyVotes({ from: owner });
+        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Voters registration is not open yet');
     });
 
 
-    it('should register a voter with correct info', async () => {
+    it('should revert when adding an already registered voter', async () => {
         await votingInstance.addVoter(voter, { from: owner });
-
-        let registeredVoter = await votingInstance.getVoter(voter, { from: voter });
-        
-        expect(registeredVoter.isRegistered).to.equal(true);
-        expect(registeredVoter.hasVoted).to.equal(false);
-        expect(registeredVoter.votedProposalId).to.be.bignumber.equal(new BN(0));
+        expectRevert(votingInstance.addVoter(voter, { from: owner }),'Already registered');
     });
    
-  
-    it('should emit VoterRegistered event', async () => {
-        let evt = await votingInstance.addVoter(voter, { from: owner });
-        expectEvent(evt, 'VoterRegistered', {voterAddress: voter,});
+
+    it('should be RegisteringVoters as default workflowStatus', async () => {
+        const actualStatus = await votingInstance.workflowStatus();  
+        const RegisteringVoters = new BN(0);
+        
+        expect(actualStatus).to.be.bignumber.equal(RegisteringVoters);
     });
-  
 
 })
