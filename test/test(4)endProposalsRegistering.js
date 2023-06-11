@@ -8,9 +8,6 @@ contract('Voting', accounts => {
     const owner = accounts[0];
     const voter1 = accounts[1];
     const voter2 = accounts[2];
-    const nonRegisteredVoter = accounts[8];
-    const proposalDescription1 = "Proposal 1";
-    const proposalDescription2 = "Proposal 2";
     
     
     beforeEach(async () => {
@@ -18,6 +15,7 @@ contract('Voting', accounts => {
       await votingInstance.addVoter(voter1, { from: owner });
       await votingInstance.addVoter(voter2, { from: owner });
     });
+
 
     it('should endProposalsRegistering correctly', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
@@ -60,6 +58,12 @@ contract('Voting', accounts => {
         expectRevert(votingInstance.endProposalsRegistering({ from: owner }), 'Registering proposals havent started yet');
 
         await votingInstance.startVotingSession({ from: owner });
+        expectRevert(votingInstance.endProposalsRegistering({ from: owner }), 'Registering proposals havent started yet');
+
+        await votingInstance.endVotingSession({ from: owner });
+        expectRevert(votingInstance.endProposalsRegistering({ from: owner }), 'Registering proposals havent started yet');
+
+        await votingInstance.tallyVotes({ from: owner });
         expectRevert(votingInstance.endProposalsRegistering({ from: owner }), 'Registering proposals havent started yet');
     }); 
 

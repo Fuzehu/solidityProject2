@@ -8,7 +8,6 @@ contract('Voting', accounts => {
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
-    const nonRegisteredVoter = accounts[8];
     const proposalDescription1 = "Proposal 1";
     const proposalDescription2 = "Proposal 2";
     const ProposalId0 = new BN(0);
@@ -70,7 +69,7 @@ contract('Voting', accounts => {
     });
 
 
-    it("should revert if called before the VotingSessionEnded", async () => {
+    it("should revert if called before the VotingSessionEnded WorkflowStatus", async () => {
         // WorkflowStatus = workflowStatus.startVotingSession, check beforeEach
 
         expectRevert(votingInstance.tallyVotes({ from: owner }),'Current status is not voting session ended');

@@ -33,7 +33,7 @@ contract('Voting', accounts => {
     });
 
     
-    it('should increase properly the proposalsArray count', async () => {
+    it('hould increase properly the proposalsArray count', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
         await votingInstance.addProposal(proposalDescription1, { from: voter1 });
 
@@ -59,29 +59,38 @@ contract('Voting', accounts => {
     });
 
 
-    it('should revert when adding a proposal from a non-registered voter account', async () => {   
+    it('should revert if not called by a registered voter account', async () => {
         await votingInstance.startProposalsRegistering({ from: owner });
 
         expectRevert(votingInstance.addProposal(proposalDescription1, { from: nonRegisteredVoter }),"You are not a resgistered voter");
+        expectRevert(votingInstance.addProposal(proposalDescription1, { from: owner }),"You are not a resgistered voter");
     });
     
 
-    it('should revert when adding a proposal before the voter registration phase', async () => {      
+    it('should revert when adding a proposal before the ProposalsRegistrationStarted status', async () => {      
         // no need to specify any change state function, as an enum default value is the first value (in this case workflowStatus.RegisteringVoters)
 
         expectRevert(votingInstance.addProposal(proposalDescription1, { from: voter1 }),"Proposals are not allowed yet");
     });
 
 
-    it('should revert when adding a proposal after the registration period', async () => {  
+    it('should revert when adding a proposal after the ProposalsRegistrationStarted status', async () => {  
         await votingInstance.startProposalsRegistering({ from: owner });
         await votingInstance.endProposalsRegistering({ from: owner });
-        
+        expectRevert(votingInstance.addProposal(proposalDescription1, { from: voter1 }),"Proposals are not allowed yet");
+
+        await votingInstance.startVotingSession({ from: owner });
+        expectRevert(votingInstance.addProposal(proposalDescription1, { from: voter1 }),"Proposals are not allowed yet");
+
+        await votingInstance.endVotingSession({ from: owner });
+        expectRevert(votingInstance.addProposal(proposalDescription1, { from: voter1 }),"Proposals are not allowed yet");
+
+        await votingInstance.tallyVotes({ from: owner });
         expectRevert(votingInstance.addProposal(proposalDescription1, { from: voter1 }),"Proposals are not allowed yet");
     });
 
 
-    it('Should revert when adding an empty proposal', async () => {    
+    it('should revert when adding an empty proposal', async () => {    
         await votingInstance.startProposalsRegistering({ from: owner });
   
         expectRevert(votingInstance.addProposal('', { from: voter1 }), 'Empty proposal are not allowed');

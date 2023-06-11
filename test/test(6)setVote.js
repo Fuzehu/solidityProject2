@@ -39,7 +39,6 @@ contract('Voting', accounts => {
         let registeredVoter2 = await votingInstance.getVoter(voter2, { from: voter2 });
         let registeredVoter3 = await votingInstance.getVoter(voter3, { from: voter3 });
 
-
         // Get the initial vote count for the selected proposals
         const initialVoteCountProposal1 = await votingInstance.getOneProposal(new BN(1), { from: voter1 });
         expect(initialVoteCountProposal1.voteCount).to.be.bignumber.equal(new BN(0));
@@ -110,21 +109,22 @@ contract('Voting', accounts => {
     }); 
 
 
-    it('should revert when voting from a non-registered voter account', async () => {
+    it('should revert if not called by a registered voter account', async () => {
         await votingInstance.startVotingSession({ from: owner });
 
         expectRevert(votingInstance.setVote(selectedProposalId1, { from: nonRegisteredVoter }), 'You are not a resgistered voter');
+        expectRevert(votingInstance.setVote(selectedProposalId1, { from: owner }), 'You are not a resgistered voter');
     });
 
 
-    it('should revert when voting before the voting period', async () => {
+    it('should revert when voting before the VotingSessionStarted status', async () => {
         // WorkflowStatus = workflowStatus.endProposalsRegistering, check beforeEach
 
         expectRevert(votingInstance.setVote(selectedProposalId1, { from: voter1 }), 'Voting session havent started yet');
     });
 
 
-    it('should revert when voting after the voting period', async () => {
+    it('should revert when voting after the VotingSessionStarted status', async () => {
         await votingInstance.startVotingSession({ from: owner });
         await votingInstance.endVotingSession({ from: owner });
 

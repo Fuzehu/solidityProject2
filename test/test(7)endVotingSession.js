@@ -8,12 +8,8 @@ contract('Voting', accounts => {
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
-    const nonRegisteredVoter = accounts[8];
     const proposalDescription1 = "Proposal 1";
     const proposalDescription2 = "Proposal 2";
-    const selectedProposalId1 = new BN(1);
-    const selectedProposalId2 = new BN(2);
-    const invalidProposalId = new BN(3);
     
     
     beforeEach(async () => {
